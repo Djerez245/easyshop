@@ -1,12 +1,14 @@
 package org.yearup.data.mysql;
 
+import org.apache.ibatis.javassist.NotFoundException;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 import org.yearup.data.CategoryDao;
 import org.yearup.models.Category;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -20,21 +22,71 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     @Override
     public List<Category> getAllCategories()
     {
+        ArrayList<Category> results = new ArrayList<>();
+        try(Connection connection = getConnection()){
+            PreparedStatement statement = connection.prepareStatement("""
+                    SELECT * FROM categories;
+                    """);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()){
+               Category c = mapRow(rs);
+               results.add(c);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         // get all categories
-        return null;
+        return results;
     }
 
     @Override
     public Category getById(int categoryId)
     {
+        Category c = null;
+        try(Connection connection = getConnection()){
+
+            PreparedStatement statement = connection.prepareStatement("""
+                    SELECT * FROM categories WHERE category_id = ?;
+                    """);
+            statement.setInt(1, categoryId);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()){
+                c = mapRow(rs);
+            } else {
+                System.out.println(categoryId + "not found");
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         // get category by id
-        return null;
+        return c;
     }
 
+
+    // TODO: find a way to make this work
     @Override
     public Category create(Category category)
     {
-        // create a new category
+
+        try(Connection connection = getConnection()){
+
+            PreparedStatement statement = connection.prepareStatement("""
+                    INSERT INTO categories VALUES(null, ?, ?);
+                    """, Statement.RETURN_GENERATED_KEYS);
+            statement.setString(1, category.getName());
+            statement.setString(2, category.getDescription());
+            statement.executeUpdate();
+            ResultSet key = statement.getGeneratedKeys();
+            if (key.next()) {
+                int id = key.getInt(1);
+                return new Category(id, category.getName(), category.getDescription());
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
@@ -47,6 +99,17 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     @Override
     public void delete(int categoryId)
     {
+        try(Connection connection = getConnection()) {
+
+            PreparedStatement statement = connection.prepareStatement("""
+                    DELETE FROM categories WHERE category_id = ?;
+                    """);
+
+            statement.setInt(1, categoryId);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         // delete category
     }
 
@@ -65,5 +128,6 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
 
         return category;
     }
+
 
 }
