@@ -98,4 +98,5 @@ public class CategoriesController
         categoryDao.delete(id);
     }
 
+
 }
