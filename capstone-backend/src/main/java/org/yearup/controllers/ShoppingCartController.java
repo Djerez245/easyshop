@@ -37,7 +37,7 @@ public class ShoppingCartController
     }
 
     // each method in this controller requires a Principal object as a parameter
-    @GetMapping("/{principal}")
+    @GetMapping
     public ShoppingCart getCart(Principal principal)
     {
         try
@@ -68,7 +68,7 @@ public class ShoppingCartController
             User user = userDao.getByUserName(userName);
             int userId = user.getId();
 
-            return shoppingCartDao.getByUserId(userId);
+            return shoppingCartDao.addProduct(productDao.getById(productId), userId);
 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");

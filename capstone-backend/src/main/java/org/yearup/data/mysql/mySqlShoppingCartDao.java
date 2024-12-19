@@ -23,19 +23,18 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
     @Override
     public ShoppingCart getByUserId(int userId) {
 
-        ShoppingCart s = null;
+        ShoppingCart s = new ShoppingCart();
         try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement("""
                     SELECT * FROM shopping_cart
-                    JOIN shopping_cart
-                    ON products.product_id = shopping_cart.product_id;
+                    JOIN products
+                    ON products.product_id = shopping_cart.product_id
                     WHERE user_id = ?;
                     """);
             statement.setInt(1, userId);
             ResultSet rs = statement.executeQuery();
 
-            if (rs.next()) {
-                userId = rs.getInt("user_id");
+            while (rs.next()) {
                 int productId = rs.getInt("product_id");
                 String name = rs.getString("name");
                 BigDecimal price = rs.getBigDecimal("price");
@@ -45,14 +44,15 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
                 String image = rs.getString("image_url");
                 int stock = rs.getInt("stock");
                 boolean featured = rs.getBoolean("featured");
-                int quantity = rs.getInt("quantity");
                 Product p = new Product(productId,name,price, categoryId,description,color,stock,featured,image);
                 ShoppingCartItem item = new ShoppingCartItem();
                 item.setProduct(p);
-                s = new ShoppingCart();
                 s.add(item);
-
             }
+            if (!rs.next()){
+                System.out.println("not found");
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -73,6 +73,7 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
             statement.setInt(2, product.getProductId());
             statement.executeUpdate();
             ShoppingCartItem item = new ShoppingCartItem();
+            item.setProduct(product);
             shoppingCart.add(item);
 
         } catch (SQLException e) {
@@ -107,6 +108,7 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
           PreparedStatement statement = connection.prepareStatement("""
                   DELETE FROM shopping_cart WHERE user_id = ?;
                   """);
+          statement.setInt(1, userId);
           statement.execute();
 
         } catch (SQLException e) {
