@@ -47,10 +47,10 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
                 boolean featured = rs.getBoolean("featured");
                 int quantity = rs.getInt("quantity");
                 Product p = new Product(productId,name,price, categoryId,description,color,stock,featured,image);
-                ShoppingCartItem si = new ShoppingCartItem();
-                si.setProduct(p);
+                ShoppingCartItem item = new ShoppingCartItem();
+                item.setProduct(p);
                 s = new ShoppingCart();
-                s.add(si);
+                s.add(item);
 
             }
         } catch (SQLException e) {
@@ -83,13 +83,16 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
 
     // figure out a way to set these parameters
     @Override
-    public void updateCart(int productId) {
+    public void updateCart(int userId, ShoppingCartItem item) {
         try(Connection connection = getConnection()){
             PreparedStatement statement = connection.prepareStatement("""
                     UPDATE shopping_cart
                     SET product_id = ?, quantity = ?
                     WHERE user_id = ?
                     """);
+            statement.setInt(1, item.getProductId());
+            statement.setInt(2, item.getQuantity());
+            statement.setInt(3, userId);
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
