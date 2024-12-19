@@ -14,6 +14,8 @@ import org.yearup.models.User;
 
 import java.security.Principal;
 
+//TODO: STILL NO ACCESS IN POSTMAN TEST
+
 // convert this class to a REST controller
 // only logged in users should have access to these actions
 @RestController
