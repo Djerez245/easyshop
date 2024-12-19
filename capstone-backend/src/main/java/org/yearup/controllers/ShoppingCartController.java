@@ -14,7 +14,6 @@ import org.yearup.models.User;
 
 import java.security.Principal;
 
-//TODO: STILL NO ACCESS IN POSTMAN TEST
 
 // convert this class to a REST controller
 // only logged in users should have access to these actions
@@ -68,7 +67,8 @@ public class ShoppingCartController
             User user = userDao.getByUserName(userName);
             int userId = user.getId();
 
-            return shoppingCartDao.addProduct(productDao.getById(productId), userId);
+            shoppingCartDao.addProduct(productDao.getById(productId), userId,1);
+            return getCart(principal);
 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
@@ -80,14 +80,15 @@ public class ShoppingCartController
     // https://localhost:8080/cart/products/15 (15 is the productId to be updated)
     // the BODY should be a ShoppingCartItem - quantity is the only value that will be updated
     @PutMapping("/products/{productId}")
-    public void updateCart(Principal principal, @RequestBody ShoppingCartItem item, int productId){
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateCart(Principal principal,@PathVariable int productId, @RequestBody ShoppingCartItem item){
         try {
             // get the userId from the principal
             String userName = principal.getName();
             User user = userDao.getByUserName(userName);
             int userId = user.getId();
 
-            shoppingCartDao.updateCart(userId, item);
+            shoppingCartDao.updateCart(userId, productId, item.getQuantity());
 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
@@ -98,8 +99,8 @@ public class ShoppingCartController
     // add a DELETE method to clear all products from the current users cart
     // https://localhost:8080/cart
     @DeleteMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCart(Principal principal){
+    @ResponseStatus(HttpStatus.OK)
+    public ShoppingCart deleteCart(Principal principal){
         try {
             // get the userId from the principal
             String userName = principal.getName();
@@ -107,6 +108,7 @@ public class ShoppingCartController
             int userId = user.getId();
 
             shoppingCartDao.clear(userId);
+            return getCart(principal);
 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");

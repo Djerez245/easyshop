@@ -61,16 +61,20 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
     }
 
     @Override
-    public ShoppingCart addProduct(Product product, int userId) {
+    public ShoppingCart addProduct(Product product, int userId, int quantity) {
 
         ShoppingCart shoppingCart = getByUserId(userId);
 
         try(Connection connection = getConnection()){
             PreparedStatement statement = connection.prepareStatement("""
-                    INSERT INTO shopping_cart(user_id, product_id) VALUES(?, ?)
+                    INSERT INTO shopping_cart(user_id, product_id, quantity) VALUES(?, ?, ?)
+                    ON DUPLICATE KEY UPDATE quantity = quantity + ?;
                     """);
             statement.setInt(1, userId);
             statement.setInt(2, product.getProductId());
+            statement.setInt(3, quantity);
+            statement.setInt(4, quantity);
+
             statement.executeUpdate();
             ShoppingCartItem item = new ShoppingCartItem();
             item.setProduct(product);
@@ -84,16 +88,17 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
 
     // figure out a way to set these parameters
     @Override
-    public void updateCart(int userId, ShoppingCartItem item) {
+    public void updateCart(int userId, int productId, int quantity) {
         try(Connection connection = getConnection()){
             PreparedStatement statement = connection.prepareStatement("""
                     UPDATE shopping_cart
-                    SET product_id = ?, quantity = ?
-                    WHERE user_id = ?
+                    SET quantity = ?
+                    WHERE user_id = ? AND product_id = ?;
                     """);
-            statement.setInt(1, item.getProductId());
-            statement.setInt(2, item.getQuantity());
-            statement.setInt(3, userId);
+            statement.setInt(1, quantity);
+            statement.setInt(2, userId);
+            statement.setInt(3, productId);
+            statement.executeUpdate();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

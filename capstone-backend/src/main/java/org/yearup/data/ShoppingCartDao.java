@@ -9,8 +9,8 @@ import java.util.ArrayList;
 public interface ShoppingCartDao
 {
     ShoppingCart getByUserId(int userId);
-    ShoppingCart addProduct(Product product, int userId);
-    void updateCart(int userId, ShoppingCartItem item);
+    ShoppingCart addProduct(Product product, int userId, int quantity);
+    void updateCart(int userId, int productId, int quantity);
     void clear(int userId);
 
     // add additional method signatures here

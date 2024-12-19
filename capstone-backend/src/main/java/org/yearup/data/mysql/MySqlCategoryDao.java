@@ -65,7 +65,6 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     }
 
 
-    // TODO: find a way to make this work
     @Override
     public Category create(Category category)
     {
