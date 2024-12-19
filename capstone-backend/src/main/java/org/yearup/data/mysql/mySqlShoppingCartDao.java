@@ -81,8 +81,19 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
         return shoppingCart;
     }
 
+    // figure out a way to set these parameters
     @Override
     public void updateCart(int productId) {
+        try(Connection connection = getConnection()){
+            PreparedStatement statement = connection.prepareStatement("""
+                    UPDATE shopping_cart
+                    SET product_id = ?, quantity = ?
+                    WHERE user_id = ?
+                    """);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 

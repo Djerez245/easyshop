@@ -1,5 +1,6 @@
 package org.yearup.data.mysql;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.yearup.models.Profile;
 import org.yearup.data.ProfileDao;
@@ -10,6 +11,7 @@ import java.sql.*;
 @Component
 public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
 {
+    @Autowired
     public MySqlProfileDao(DataSource dataSource)
     {
         super(dataSource);
@@ -42,6 +44,49 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
         {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Profile getById(int userId) {
+
+        Profile p = null;
+        try(Connection connection = getConnection()){
+            PreparedStatement statement = connection.prepareStatement("""
+                    SELECT * FROM profile WHERE user_id = ?;
+                    """);
+            statement.setInt(1, userId);
+            ResultSet rs = statement.executeQuery();
+
+            if (rs.next()){
+               userId = rs.getInt("user_id");
+               String firstName = rs.getString("first_name");
+               String lastName = rs.getString("last_name");
+               String phone = rs.getString("phone");
+               String email = rs.getString("email");
+               String address = rs.getString("address");
+               String city = rs.getString("city");
+               String state = rs.getString("state");
+               String zip = rs.getString("zip");
+               p = new Profile();
+               p.setUserId(userId);
+               p.setFirstName(firstName);
+               p.setLastName(lastName);
+               p.setPhone(phone);
+               p.setEmail(email);
+               p.setAddress(address);
+               p.setCity(city);
+               p.setState(state);
+               p.setZip(zip);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return p;
+    }
+
+    @Override
+    public void update(Profile profile) {
+
     }
 
 }

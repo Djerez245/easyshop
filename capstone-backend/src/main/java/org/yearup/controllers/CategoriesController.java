@@ -33,7 +33,7 @@ public class CategoriesController
     }
 
     // add the appropriate annotation for a get action -DONE
-    @GetMapping("/all")
+    @GetMapping
     @PreAuthorize("permitAll()")
     public List<Category> getAll()
     {
