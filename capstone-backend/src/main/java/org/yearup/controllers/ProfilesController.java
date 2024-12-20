@@ -22,6 +22,7 @@ public class ProfilesController {
 
     // gets a users profile by a userID
     @GetMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public Profile getByUserId(@PathVariable int userId){
         try {
             return profileDao.getById(userId);
