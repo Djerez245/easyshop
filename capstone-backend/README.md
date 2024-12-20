@@ -20,7 +20,7 @@ return types. Everything I did with category classes I did with my products clas
 
 Here are some examples...
 
-![categoryDaoExample](/images/categoryDAO.png)
+![categoryDaoExample](capstone-backend/images/categoryDAO.png)
 
 ![categoryDaoExample](/images/categoryDAO2.png)
 
